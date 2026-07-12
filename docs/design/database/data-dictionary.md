@@ -187,7 +187,7 @@ The `users` table stores administrator account information used to authenticate 
 
 Within the MVP scope, the system supports a single user role: **Inventory Administrator**.
 
-This table follows Laravel's default authentication structure while remaining extensible for future user management features.
+This table follows Laravel's default authentication structure and provides a foundation for future user management enhancements.
 
 ### Column Definition
 
@@ -296,7 +296,7 @@ Each product belongs to one category and one supplier. Product records serve as 
 - Product stock is updated automatically through Stock In and Stock Out transactions.
 - Product records cannot exist without valid category and supplier references.
 - The `minimum_stock` value is used to identify products that require replenishment.
-- Stock values must never be negative.
+- Product stock must never become negative.
 
 ---
 
