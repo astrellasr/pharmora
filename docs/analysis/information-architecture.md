@@ -240,19 +240,15 @@ Authentication
         │
         ▼
 Dashboard
-        │
-        ├──────────────┬──────────────┬──────────────┬──────────────┐
-        ▼              ▼              ▼              ▼
-Products      Categories      Suppliers      Inventory
-                                                   │
-                                    ┌──────────────┼──────────────┐
-                                    ▼              ▼              ▼
-                               Stock In      Stock Out   Inventory History
-
-Dashboard
-        │
-        ▼
-Profile
+│
+├── Products
+├── Categories
+├── Suppliers
+├── Inventory
+│      ├── Stock In
+│      ├── Stock Out
+│      └── Inventory History
+└── Profile
 ```
 
 The Dashboard functions as the application's central navigation hub, providing direct access to all operational modules.
