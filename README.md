@@ -1,58 +1,400 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 💊 Pharmora
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Smart Inventory. Seamless Operations.**
 
-## About Laravel
+A modern inventory management system built with **Laravel 12**, **PostgreSQL**, and **Tailwind CSS** for pharmacies, clinics, and healthcare businesses.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Pharmora is a portfolio project developed to demonstrate full-stack web development skills, software engineering practices, database design, and modern UI/UX implementation using the Laravel ecosystem.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Badges
 
-## Learning Laravel
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![Blade](https://img.shields.io/badge/Blade-Template-FF2D20?logo=laravel&logoColor=white)
+![Status](https://img.shields.io/badge/Status-In_Development-F59E0B)
+![License](https://img.shields.io/badge/License-MIT-22C55E)
+![Architecture](https://img.shields.io/badge/Architecture-MVC-2563EB)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# Table of Contents
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- [About Pharmora](#about-pharmora)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [System Architecture](#system-architecture)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Documentation](#documentation)
+- [Development Roadmap](#development-roadmap)
+- [Screenshots](#screenshots)
+- [Project Progress](#project-progress)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+# About Pharmora
 
-```bash
-composer require laravel/boost --dev
+Pharmora is a modern inventory management platform designed to help healthcare businesses efficiently manage medicines, suppliers, inventory movements, and stock availability through a clean, responsive, and user-friendly interface.
 
-php artisan boost:install
+The project emphasizes maintainability, scalability, and software engineering best practices rather than serving solely as a CRUD application. Every implementation is guided by comprehensive documentation, including product requirements, database design, wireframes, design systems, and development planning.
+
+This repository is developed as a software engineering portfolio project to demonstrate practical experience in designing, developing, and documenting a production-style Laravel application from initial planning through implementation.
+
+---
+
+# Key Features
+
+Current MVP features include:
+
+- 🔐 Secure user authentication
+- 💊 Product management
+- 🗂 Category management
+- 🚚 Supplier management
+- 📦 Stock In management
+- 📤 Stock Out management
+- 📜 Inventory transaction history
+- 🔍 Search and filtering
+- 📊 Inventory dashboard
+- 📱 Responsive interface
+- 🌙 Dark mode support
+- ⚡ Modern Laravel architecture
+- 🎨 Clean enterprise UI
+- 🗄 PostgreSQL relational database
+- 📚 Comprehensive project documentation
+
+The project is being developed incrementally following a structured implementation roadmap, with each feature aligned to the project's Product Requirements Document (PRD), Database Design, Entity Relationship Diagram (ERD), Data Dictionary, Wireframes, and Design System.
+
+# Technology Stack
+
+Pharmora is built using modern web technologies with a strong focus on maintainability, scalability, and clean architecture.
+
+| Category | Technology |
+|----------|------------|
+| Backend | Laravel 12 |
+| Language | PHP 8.4 |
+| Frontend | Blade, Tailwind CSS, Alpine.js |
+| Database | PostgreSQL 17 |
+| Authentication | Laravel Breeze |
+| ORM | Eloquent ORM |
+| Build Tool | Vite |
+| Package Manager | Composer, NPM |
+| Version Control | Git & GitHub |
+| Testing | Pest |
+| Deployment (Planned) | Laravel Forge / VPS |
+
+---
+
+# System Architecture
+
+Pharmora follows Laravel's MVC (Model-View-Controller) architecture to promote clean code organization, separation of concerns, and long-term maintainability.
+
+```
+                    Client (Browser)
+                            │
+                            ▼
+                    Laravel Routes
+                            │
+                            ▼
+                     Controllers
+                            │
+            ┌───────────────┴───────────────┐
+            ▼                               ▼
+        Business Logic                  Blade Views
+          (Controllers)                     (UI)
+            │
+            ▼
+      Eloquent Models
+            │
+            ▼
+      PostgreSQL Database
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+The application also leverages Laravel's built-in features, including:
 
-## Contributing
+- Authentication & Authorization
+- Middleware
+- Request Validation
+- Eloquent ORM
+- Database Migrations
+- Blade Components
+- Service Providers
+- Route Protection
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+This architecture keeps business logic separated from presentation logic while ensuring the application remains scalable as additional modules are introduced.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Project Structure
 
-## Security Vulnerabilities
+The repository is organized into documentation, application source code, project planning, and supporting assets.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```text
+Pharmora
+│
+├── app/                    # Application source code
+├── assets/                 # Branding assets
+├── bootstrap/              # Framework bootstrap files
+├── config/                 # Application configuration
+├── database/               # Migrations, seeders, factories
+├── docs/                   # Project documentation
+├── planning/               # Development planning
+├── public/                 # Public assets
+├── resources/              # Blade views, CSS, JavaScript
+├── routes/                 # Application routes
+├── screenshots/            # UI screenshots
+├── storage/                # Application storage
+├── tests/                  # Feature & Unit tests
+│
+├── artisan
+├── composer.json
+├── package.json
+├── README.md
+└── vite.config.js
+```
 
-## License
+The `docs` directory contains comprehensive software engineering documentation created before implementation, ensuring every development phase aligns with the project's architecture and business requirements.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+# Installation
+
+## Prerequisites
+
+Before running the project, make sure the following software is installed:
+
+- PHP 8.4 or higher
+- Composer
+- PostgreSQL 17
+- Node.js 24+
+- NPM
+- Git
+
+---
+
+## Clone Repository
+
+```bash
+git clone https://github.com/astrellasr/pharmora.git
+
+cd pharmora
+```
+
+---
+
+## Install Dependencies
+
+```bash
+composer install
+
+npm install
+```
+
+---
+
+### Environment Configuration
+
+Create the environment file.
+
+```bash
+cp .env.example .env
+```
+
+> **Windows (PowerShell)**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Generate the application key.
+
+```bash
+php artisan key:generate
+```
+
+Configure your PostgreSQL connection inside the `.env` file.
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=pharmora
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+```
+
+---
+
+## Database Migration
+
+Run the database migrations.
+
+```bash
+php artisan migrate
+```
+
+---
+
+## Run Development Server
+
+Start the Laravel development server.
+
+```bash
+php artisan serve
+```
+
+In a separate terminal, start the Vite development server.
+
+```bash
+npm run dev
+```
+
+Open your browser and visit:
+
+```
+http://127.0.0.1:8000
+```
+
+The application should now be running successfully.
+
+# Documentation
+
+One of Pharmora's primary goals is to demonstrate a structured software engineering workflow. Before implementation began, the project was fully planned and documented to ensure consistency across business requirements, database design, user experience, and development execution.
+
+## Project Documentation
+
+| Document | Description |
+|----------|-------------|
+| Product Requirement Document (PRD) | Defines business goals, users, features, and project scope. |
+| Business Flow | Describes the overall business process supported by the system. |
+| User Flow | Illustrates user interactions throughout the application. |
+| Information Architecture | Defines the application's navigation structure and sitemap. |
+| Database Design | Documents database entities, attributes, and constraints. |
+| Entity Relationship Diagram (ERD) | Visualizes relationships between all database entities. |
+| Data Dictionary | Defines every database table, field, and data type. |
+| Wireframe | Presents low-fidelity layouts for every application screen. |
+| Design System | Defines colors, typography, spacing, components, and UI standards. |
+| Implementation Plan | Outlines the complete development roadmap from setup to deployment. |
+
+All documentation is available inside the `docs/` directory.
+
+---
+
+# Development Roadmap
+
+The project is developed incrementally following a structured implementation plan.
+
+| Phase | Status |
+|--------|--------|
+| Phase 1 — Project Setup | ✅ Completed |
+| Phase 2 — Database Foundation | 🔄 In Progress |
+| Phase 3 — Product Management Module | ⏳ Planned |
+| Phase 4 — Category Management Module | ⏳ Planned |
+| Phase 5 — Supplier Management Module | ⏳ Planned |
+| Phase 6 — Inventory Management Module | ⏳ Planned |
+| Phase 7 — Dashboard Development | ⏳ Planned |
+| Phase 8 — UI & UX Enhancement | ⏳ Planned |
+| Phase 9 — Testing & Optimization | ⏳ Planned |
+| Phase 10 — Deployment | ⏳ Planned |
+
+Each phase is completed and committed independently to maintain a clean Git history and demonstrate an iterative software development process.
+
+---
+
+# Screenshots
+
+Application screenshots will be added as development progresses.
+
+| Feature | Preview |
+|---------|---------|
+| Login | To be added after implementation. |
+| Dashboard | To be added after implementation. |
+| Products | To be added after implementation. |
+| Categories | To be added after implementation. |
+| Suppliers | To be added after implementation. |
+| Inventory | To be added after implementation. |
+| Profile | CTo be added after implementation. |
+
+Screenshots will be stored in the `screenshots/` directory and updated after each completed module.
+
+---
+
+# Development Progress
+
+The project is actively under development.
+
+```text
+Overall Progress
+
+████████░░░░░░░░░░░░ 40%
+
+Documentation           ████████████████████ 100%
+Project Setup           ████████████████████ 100%
+Authentication          ████████████████████ 100%
+Database Foundation     ░░░░░░░░░░░░░░░░░░░░
+Product Module          ░░░░░░░░░░░░░░░░░░░░   0%
+Category Module         ░░░░░░░░░░░░░░░░░░░░   0%
+Supplier Module         ░░░░░░░░░░░░░░░░░░░░   0%
+Inventory Module        ░░░░░░░░░░░░░░░░░░░░   0%
+Dashboard               ░░░░░░░░░░░░░░░░░░░░   0%
+Deployment              ░░░░░░░░░░░░░░░░░░░░   0%
+```
+
+Current development focuses on building a production-style inventory management application while maintaining clean architecture, comprehensive documentation, and software engineering best practices throughout every development phase.
+
+# Contributing
+
+Thank you for your interest in Pharmora.
+
+At the current stage, this repository is maintained as a personal portfolio project and is not accepting external contributions.
+
+As the project evolves, contribution guidelines, issue templates, and pull request workflows may be introduced to support collaborative development.
+
+If you have suggestions, feedback, or improvement ideas, feel free to open an issue or start a discussion.
+
+---
+
+# License
+
+This project is licensed under the **MIT License**.
+
+You are free to use, modify, and distribute this project in accordance with the terms of the MIT License.
+
+See the `LICENSE` file for more information.
+
+---
+
+# Author
+
+**Astrella Syadira Ramadhante**
+
+Software Engineering & Laravel Portfolio Project
+
+- GitHub: https://github.com/astrellasr
+- LinkedIn: https://linkedin.com/in/astrella-syadira/
+
+---
+
+# Closing
+
+Pharmora represents more than an inventory management application.
+
+It demonstrates a complete software engineering workflow—from product planning and system analysis to database design, UI/UX planning, implementation, and deployment.
+
+Rather than focusing solely on writing code, this project emphasizes structured documentation, clean architecture, maintainable development practices, and incremental feature delivery.
+
+The repository will continue to evolve as new modules, improvements, and production-ready features are implemented throughout the project's development roadmap.
+
+Thank you for visiting this repository.
+
+If you find this project interesting, consider giving it a ⭐ on GitHub.
+
+---
+
+This repository is continuously improved as new features and modules are implemented throughout the development journey.
