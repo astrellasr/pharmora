@@ -1,7 +1,7 @@
 # 📄 Entity Relationship Diagram (ERD)
 
-> **Version:** 1.0  
-> **Status:** Final  
+> **Version:** 2.0  
+> **Status:** Approved & Frozen  
 > **Document Type:** Entity Relationship Diagram (ERD)  
 > **Project:** Pharmora  
 > **Prepared by:** Astrella Syadira Ramadhante  
@@ -22,73 +22,98 @@
 
 # 1. Purpose
 
-This document provides a visual representation of the database structure used by Pharmora.
+This document provides the official Entity Relationship Diagram (ERD) for the Pharmora database.
 
-Its primary purpose is to illustrate how business entities are connected through relational database relationships while maintaining consistency with the project's Database Design document.
+Its primary purpose is to illustrate how business entities are connected through relational database relationships while maintaining consistency with the project's Database Design, Data Dictionary, Architecture Decision Records (ADR), and Database Schema Freeze documentation.
 
-The Entity Relationship Diagram (ERD) serves as a blueprint for implementing Laravel migrations, Eloquent relationships, database constraints, and future database enhancements.
+The Entity Relationship Diagram serves as the primary blueprint for implementing Laravel migrations, Eloquent relationships, foreign key constraints, and future database enhancements.
 
-Rather than introducing new business rules, this document visualizes the relationships that have already been defined throughout the project documentation, ensuring a shared understanding of the application's data model.
+Rather than introducing new business rules, this document visualizes the relationships that have already been approved throughout the database design process, ensuring a shared understanding of the application's relational model.
 
 The ERD supports the following objectives:
 
-- Visualize the relationships between business entities.
-- Improve understanding of the overall database structure.
-- Serve as a reference for Laravel migration development.
-- Support the implementation of Eloquent model relationships.
-- Assist future maintenance and database expansion.
+- Visualize relationships between business entities.
+- Validate the final database architecture.
+- Serve as the primary reference for Laravel migration development.
+- Support Eloquent relationship implementation.
+- Improve database maintainability and future scalability.
 
-The diagram presented in this document represents the MVP scope of Pharmora and includes only the entities required to support the current inventory management features.
-
-Future versions of the application may extend this diagram with additional entities while preserving the architectural principles established in the Database Design document.
+The diagram presented in this document represents the finalized database schema for Pharmora MVP Version 1.0.
 
 ---
 
 # 2. Entity Relationship Diagram
 
-The following Entity Relationship Diagram illustrates the logical relationships between all database entities within the MVP scope of Pharmora.
+The following Entity Relationship Diagram illustrates the finalized relational database structure used by Pharmora.
 
-The diagram focuses on entity relationships rather than detailed table attributes.
+The diagram focuses on entity relationships and essential implementation attributes.
 
-Detailed column definitions, data types, and constraints are documented separately in the **Data Dictionary**.
+Detailed column definitions, data types, indexes, constraints, and validation rules are documented separately in the **Data Dictionary**.
 
 ```mermaid
 erDiagram
 
     USERS {
         bigint id PK
+        uuid uuid UK
+        varchar email UK
+    }
+
+    ORGANIZATION_SETTINGS {
+        bigint id PK
     }
 
     CATEGORIES {
         bigint id PK
+        uuid uuid UK
+        varchar code UK
+        varchar name UK
     }
 
     SUPPLIERS {
         bigint id PK
+        uuid uuid UK
+        varchar code UK
     }
 
     PRODUCTS {
         bigint id PK
+        uuid uuid UK
+
         bigint category_id FK
         bigint supplier_id FK
+
+        varchar sku UK
+        varchar barcode UK
+
+        integer current_stock
+        integer minimum_stock
+
+        boolean status
     }
 
-    INVENTORY_TRANSACTIONS {
+    INVENTORY_MOVEMENTS {
         bigint id PK
+        uuid uuid UK
+
         bigint product_id FK
         bigint user_id FK
+
+        varchar movement_type
+
+        integer quantity
     }
 
     CATEGORIES ||--o{ PRODUCTS : categorizes
 
     SUPPLIERS ||--o{ PRODUCTS : supplies
 
-    PRODUCTS ||--o{ INVENTORY_TRANSACTIONS : records
+    PRODUCTS ||--o{ INVENTORY_MOVEMENTS : records
 
-    USERS ||--o{ INVENTORY_TRANSACTIONS : performs
+    USERS ||--o{ INVENTORY_MOVEMENTS : performs
 ```
 
-The diagram represents the complete relational structure of the MVP database and serves as the primary reference for database implementation.
+The diagram represents the complete relational structure of the Pharmora MVP database and serves as the official reference for Laravel implementation.
 
 ---
 
@@ -100,32 +125,41 @@ The following table summarizes all relationships between entities in the Pharmor
 |---------------|-------------|--------------|-------------|
 | Categories | Products | One-to-Many (1:N) | `category_id` |
 | Suppliers | Products | One-to-Many (1:N) | `supplier_id` |
-| Products | Inventory Transactions | One-to-Many (1:N) | `product_id` |
-| Users | Inventory Transactions | One-to-Many (1:N) | `user_id` |
+| Products | Inventory Movements | One-to-Many (1:N) | `product_id` |
+| Users | Inventory Movements | One-to-Many (1:N) | `user_id` |
+
+**Organization Settings** is an independent configuration entity and intentionally does not participate in foreign key relationships within the MVP scope.
 
 ---
 
 ## Cardinality Overview
 
-The MVP database consists exclusively of **One-to-Many (1:N)** relationships.
+The Pharmora MVP database consists exclusively of **One-to-Many (1:N)** relationships.
 
 ```
 Category
-1 ────────────────< N Products
+1 ────────────────< 0..N Products
 
 Supplier
-1 ────────────────< N Products
+1 ────────────────< 0..N Products
 
 Product
-1 ────────────────< N Inventory Transactions
+1 ────────────────< 0..N Inventory Movements
 
 User
-1 ────────────────< N Inventory Transactions
+1 ────────────────< 0..N Inventory Movements
 ```
 
-No Many-to-Many (M:N) or One-to-One (1:1) relationships are required within the current MVP scope.
+Participation Rules
 
-This simplified relational model improves maintainability while fully supporting the operational requirements defined in the Product Requirement Document.
+| Parent Entity | Child Entity | Parent Participation | Child Participation |
+|---------------|-------------|----------------------|---------------------|
+| Category | Product | Optional | Mandatory |
+| Supplier | Product | Optional | Mandatory |
+| Product | Inventory Movement | Optional | Mandatory |
+| User | Inventory Movement | Optional | Mandatory |
+
+No Many-to-Many (M:N) or One-to-One (1:1) relationships are required within the current MVP scope.
 
 ---
 
@@ -137,15 +171,15 @@ This section explains the purpose of each relationship represented in the Entity
 
 ## Categories → Products
 
-Relationship Type:
+**Relationship Type**
 
-**One-to-Many (1:N)**
+One-to-Many (1:N)
 
-A single category can contain multiple products, while each product belongs to exactly one category.
+A single category can classify multiple products, while every product belongs to exactly one category.
 
-This relationship organizes inventory into logical classifications, improving data organization, searchability, and reporting.
+This relationship improves product organization, searching, filtering, and reporting.
 
-Foreign Key:
+**Foreign Key**
 
 ```
 category_id
@@ -155,15 +189,15 @@ category_id
 
 ## Suppliers → Products
 
-Relationship Type:
+**Relationship Type**
 
-**One-to-Many (1:N)**
+One-to-Many (1:N)
 
 A supplier may provide multiple products, while each product references one supplier.
 
-This relationship centralizes supplier information and improves traceability during inventory procurement.
+This relationship centralizes supplier information and supports inventory procurement.
 
-Foreign Key:
+**Foreign Key**
 
 ```
 supplier_id
@@ -171,19 +205,19 @@ supplier_id
 
 ---
 
-## Products → Inventory Transactions
+## Products → Inventory Movements
 
-Relationship Type:
+**Relationship Type**
 
-**One-to-Many (1:N)**
+One-to-Many (1:N)
 
-Each product can have many inventory transactions throughout its lifecycle.
+Each product may generate multiple inventory movement records throughout its lifecycle.
 
-Every Stock In and Stock Out activity generates a new inventory transaction record linked to the corresponding product.
+Inventory Movements store every stock-related activity, including Stock In, Stock Out, and future inventory adjustment operations.
 
-This relationship enables inventory history tracking without modifying historical transaction data.
+Historical inventory records are never modified after creation.
 
-Foreign Key:
+**Foreign Key**
 
 ```
 product_id
@@ -191,19 +225,17 @@ product_id
 
 ---
 
-## Users → Inventory Transactions
+## Users → Inventory Movements
 
-Relationship Type:
+**Relationship Type**
 
-**One-to-Many (1:N)**
+One-to-Many (1:N)
 
-Each inventory transaction records the administrator responsible for performing the operation.
+Each inventory movement records the authenticated administrator responsible for performing the operation.
 
-One administrator may create multiple inventory transactions over time.
+This relationship improves accountability, traceability, and future auditing capabilities.
 
-This relationship improves accountability, traceability, and supports future auditing requirements.
-
-Foreign Key:
+**Foreign Key**
 
 ```
 user_id
@@ -213,17 +245,45 @@ user_id
 
 # 5. Design Notes
 
-The Entity Relationship Diagram has been intentionally designed to remain simple, consistent, and aligned with the MVP scope of Pharmora.
+The Entity Relationship Diagram has been intentionally designed to remain simple, normalized, and aligned with the MVP scope of Pharmora.
 
 Several architectural decisions were made during the database design process.
 
-## Centralized Inventory Transactions
+---
 
-All inventory movements are stored within a single `inventory_transactions` table.
+## Centralized Inventory Movements
 
-Instead of separating Stock In and Stock Out into different tables, the transaction type determines the nature of each inventory movement.
+All inventory activities are stored within a single **Inventory Movements** table.
 
-This approach reduces structural complexity while providing greater flexibility for future transaction types.
+Instead of separating Stock In, Stock Out, and Adjustment into different tables, the movement type determines the business operation.
+
+This approach simplifies reporting, relationships, and future feature expansion.
+
+---
+
+## UUID Strategy
+
+Business entities use UUIDs as public identifiers while retaining auto-increment primary keys for internal database relationships.
+
+This strategy improves security, API compatibility, and public URL safety.
+
+---
+
+## Current Stock Strategy
+
+Current inventory quantity is stored directly in the **Products** table.
+
+Historical inventory activities are recorded separately within **Inventory Movements**.
+
+This controlled denormalization significantly improves dashboard performance while preserving a complete inventory audit trail.
+
+---
+
+## Organization Settings
+
+Organization Settings is implemented as an independent configuration entity.
+
+Rather than duplicating organizational information across multiple tables, global configuration is centralized into a single table.
 
 ---
 
@@ -231,54 +291,44 @@ This approach reduces structural complexity while providing greater flexibility 
 
 Business entities are stored independently to minimize data redundancy.
 
-Each entity has a clearly defined responsibility and communicates with other entities through foreign key relationships.
+The database satisfies:
 
-This design improves maintainability and supports future database expansion.
+- First Normal Form (1NF)
+- Second Normal Form (2NF)
+- Third Normal Form (3NF)
 
----
-
-## Clear Separation of Master and Transactional Data
-
-Master data consists of relatively static business information:
-
-- Users
-- Categories
-- Suppliers
-- Products
-
-Transactional data records operational activities:
-
-- Inventory Transactions
-
-Separating these responsibilities simplifies maintenance and reduces unintended data dependencies.
+Only one controlled denormalization is applied for current inventory performance.
 
 ---
 
 ## Laravel Convention Compliance
 
-The database structure follows Laravel naming conventions for:
+The database follows Laravel naming conventions for:
 
 - Table names
 - Primary keys
 - Foreign keys
-- Timestamps
 - Relationship naming
+- Soft Deletes
+- Timestamp columns
 
-Following framework conventions minimizes custom configuration and improves development efficiency.
+Following Laravel conventions minimizes custom configuration and improves maintainability.
 
 ---
 
 ## MVP-Oriented Architecture
 
-The ERD intentionally excludes entities that are outside the current project scope.
+The ERD intentionally excludes entities outside the current project scope.
 
 Examples include:
 
 - Purchase Orders
 - Warehouses
-- Customers
 - Sales
-- Reports
+- Customers
+- Product Batches
+- Expiration Tracking
+- Multi-Branch Management
 
 These modules may be introduced in future versions without requiring major changes to the existing relational structure.
 
@@ -286,12 +336,10 @@ These modules may be introduced in future versions without requiring major chang
 
 # 6. Closing
 
-This Entity Relationship Diagram provides a visual representation of the relational database model that supports Pharmora's inventory management system.
+This Entity Relationship Diagram represents the finalized relational database model supporting Pharmora's inventory management platform.
 
-Together with the Database Design document, the ERD establishes a consistent foundation for implementing Laravel migrations, Eloquent models, foreign key constraints, and application logic.
+Together with the Database Design, Data Dictionary, Database Review documents, Architecture Decision Records, and Database Schema Freeze, the ERD establishes a consistent foundation for implementing Laravel migrations, Eloquent models, foreign key constraints, factories, seeders, and application logic.
 
-The Data Dictionary complements this document by providing detailed definitions for database fields, constraints, and data types.
+This document represents the official database baseline for **Pharmora MVP Version 1.0**.
 
-Future database enhancements should maintain the architectural principles established throughout this documentation to ensure consistency, maintainability, and long-term scalability.
-
-This document should be reviewed whenever new entities or relationships are introduced into the system.
+Any structural modifications introduced after this point should follow the project's Architecture Decision Record (ADR) process to maintain architectural consistency and long-term maintainability.
