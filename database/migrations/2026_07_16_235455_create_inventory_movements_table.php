@@ -12,8 +12,57 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventory_movements', function (Blueprint $table) {
+            /*
+            |--------------------------------------------------------------------------
+            | Identifiers
+            |--------------------------------------------------------------------------
+            */
+
             $table->id();
-            $table->timestamps();
+            $table->uuid('uuid')->unique();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Relationships
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('product_id')
+                ->constrained('products')
+                ->restrictOnDelete();
+
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->restrictOnDelete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Movement Information
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('movement_type');
+            $table->integer('quantity');
+
+            $table->text('notes')->nullable();
+            $table->string('reference_number')->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Timestamp
+            |--------------------------------------------------------------------------
+            */
+
+            $table->timestamp('created_at')->useCurrent();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Indexes
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index('movement_type');
+            $table->index('created_at');
         });
     }
 
