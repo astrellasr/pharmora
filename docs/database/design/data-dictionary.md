@@ -1358,3 +1358,271 @@ Potential enhancements include:
 - Product variants
 
 These features are intentionally excluded from the MVP scope.
+
+# Inventory Movements
+
+## Purpose
+
+The **Inventory Movements** table records every inventory transaction performed within the Pharmora platform.
+
+Unlike the Products table, which stores the current inventory quantity, Inventory Movements preserves the complete historical record of all stock changes.
+
+Each record represents a single inventory event and serves as the system's audit trail.
+
+Inventory Movements are immutable and must never be modified or deleted after creation.
+
+---
+
+## Business Responsibility
+
+The Inventory Movements entity is responsible for:
+
+- Inventory history
+- Stock audit trail
+- Stock In transactions
+- Stock Out transactions
+- Inventory traceability
+- Historical reporting
+- User accountability
+
+Unlike master data, Inventory Movements represent transactional data and therefore do not support Soft Deletes.
+
+---
+
+## Business Rules
+
+The Inventory Movements table follows these business rules:
+
+- Every Inventory Movement must belong to exactly one Product.
+- Every Inventory Movement must be performed by exactly one User.
+- Every movement records a single stock event.
+- Quantity must always be greater than zero.
+- Inventory history is immutable.
+- Records must never be updated.
+- Records must never be deleted.
+- Every movement contributes to the historical audit trail.
+
+---
+
+## Column Definitions
+
+| Column | Type | Nullable | Default | Constraint | Description |
+|---------|------|----------|---------|------------|-------------|
+| id | BIGINT | No | Auto Increment | Primary Key | Internal identifier |
+| uuid | UUID | No | Generated | Unique | Public identifier |
+| product_id | BIGINT | No | - | Foreign Key | Related product |
+| user_id | BIGINT | No | - | Foreign Key | Administrator performing the transaction |
+| movement_type | VARCHAR | No | - | - | Stock movement type |
+| quantity | INTEGER | No | - | - | Quantity moved |
+| notes | TEXT | Yes | NULL | - | Transaction notes |
+| reference_number | VARCHAR | Yes | NULL | - | External or internal reference |
+| created_at | TIMESTAMP | No | Current Timestamp | - | Transaction timestamp |
+
+---
+
+## Indexes
+
+| Column | Type | Purpose |
+|---------|------|---------|
+| id | Primary Key | Internal identifier |
+| uuid | Unique | Public identifier |
+| product_id | Foreign Key Index | Product relationship |
+| user_id | Foreign Key Index | User relationship |
+| movement_type | Index | Reporting |
+| created_at | Index | Timeline & reporting |
+
+---
+
+## Constraints
+
+| Constraint | Description |
+|------------|-------------|
+| Primary Key | id |
+| Unique | uuid |
+| Foreign Key | product_id |
+| Foreign Key | user_id |
+| Soft Deletes | Not Implemented |
+| updated_at | Not Implemented |
+
+Foreign key deletion strategy:
+
+- Product → RESTRICT
+- User → RESTRICT
+
+This preserves historical inventory records even if related master data becomes inactive.
+
+---
+
+## Relationships
+
+| Relationship | Type |
+|--------------|------|
+| Product → Inventory Movements | Many-to-One |
+| User → Inventory Movements | Many-to-One |
+
+Each Inventory Movement belongs to exactly one Product.
+
+Each Inventory Movement belongs to exactly one User.
+
+---
+
+## Laravel Mapping
+
+```php
+class InventoryMovement extends Model
+{
+    public $timestamps = false;
+
+    protected $fillable = [
+        'uuid',
+        'product_id',
+        'user_id',
+        'movement_type',
+        'quantity',
+        'notes',
+        'reference_number',
+        'created_at',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
+---
+
+## Inventory Strategy
+
+Inventory Movements follow an **append-only** strategy.
+
+Each inventory event creates a new record.
+
+Examples include:
+
+- Stock In
+- Stock Out
+
+Future versions may introduce additional movement types such as:
+
+- Stock Adjustment
+- Stock Transfer
+- Initial Stock
+- Purchase Receipt
+- Sales Shipment
+- Stock Correction
+
+Historical records are never modified.
+
+---
+
+## Movement Type
+
+Approved values:
+
+- stock_in
+- stock_out
+
+Future values may include:
+
+- adjustment
+- transfer
+- purchase
+- sales
+
+Movement types are stored as strings rather than database ENUM values.
+
+Validation is handled within Laravel.
+
+---
+
+## Quantity Rules
+
+The quantity column represents the number of units involved in a single inventory movement.
+
+Business rules include:
+
+- Quantity must always be greater than zero.
+- Negative values are not permitted.
+- The movement type determines whether stock is increased or decreased.
+
+Examples:
+
+| Movement Type | Quantity | Product Stock Effect |
+|---------------|---------:|---------------------|
+| stock_in | 50 | +50 |
+| stock_out | 20 | -20 |
+
+---
+
+## Immutable History
+
+Inventory Movements are immutable.
+
+Once created, records must never be:
+
+- Updated
+- Deleted
+- Rewritten
+
+If an incorrect transaction is recorded, a compensating Inventory Movement should be created instead of modifying the original record.
+
+This approach guarantees:
+
+- Complete auditability
+- Historical accuracy
+- Traceability
+- Reliable reporting
+
+---
+
+## Architectural Decisions
+
+The Inventory Movements table follows the decisions defined in:
+
+- ADR-001 — Inventory Movements
+- ADR-003 — Current Stock Strategy
+- ADR-004 — UUID Strategy
+- ADR-007 — Inventory Movement Strategy
+- ADR-008 — Immutable Inventory History
+
+Key architectural decisions include:
+
+- Centralized inventory history
+- Immutable transaction records
+- UUID public identifiers
+- Append-only architecture
+- No Soft Deletes
+- No updated_at timestamp
+
+---
+
+## Future Considerations
+
+Future versions of Pharmora may extend Inventory Movements with additional capabilities.
+
+Potential enhancements include:
+
+- Inventory adjustment reasons
+- Approval workflow
+- Warehouse location
+- Batch number
+- Expiration tracking
+- Purchase Order integration
+- Sales Order integration
+- Multi-warehouse inventory
+- Inventory transfer
+- Barcode scanning
+- QR Code scanning
+
+These features are intentionally excluded from the MVP scope.
