@@ -13,6 +13,21 @@ return new class extends Migration
     {
         Schema::create('organization_settings', function (Blueprint $table) {
             $table->id();
+
+            $table->string('organization_name');
+            $table->string('business_type');
+
+            $table->string('workspace_email');
+
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+
+            $table->string('country')->nullable();
+            $table->string('timezone')->default('Asia/Jakarta');
+            $table->string('language')->default('id');
+
+            $table->string('logo')->nullable();
+
             $table->timestamps();
         });
     }
