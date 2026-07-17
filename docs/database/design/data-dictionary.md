@@ -1626,3 +1626,329 @@ Potential enhancements include:
 - QR Code scanning
 
 These features are intentionally excluded from the MVP scope.
+
+# 7. Relationship Summary
+
+The Pharmora database uses a simple and highly maintainable relational model based entirely on **One-to-Many (1:N)** relationships.
+
+This architecture minimizes complexity while supporting all functional requirements defined for the MVP.
+
+---
+
+## Relationship Overview
+
+| Parent Entity | Child Entity | Relationship | Foreign Key |
+|---------------|-------------|--------------|-------------|
+| Categories | Products | One-to-Many | category_id |
+| Suppliers | Products | One-to-Many | supplier_id |
+| Products | Inventory Movements | One-to-Many | product_id |
+| Users | Inventory Movements | One-to-Many | user_id |
+
+---
+
+## Relationship Diagram
+
+```
+Categories
+      │
+      └──────────────┐
+                     ▼
+                 Products
+                ▲       ▲
+                │       │
+        Suppliers       │
+                        │
+                        ▼
+          Inventory Movements
+                 ▲
+                 │
+               Users
+```
+
+---
+
+## Relationship Principles
+
+The database follows these architectural principles:
+
+- No Many-to-Many relationships.
+- No circular dependencies.
+- Every foreign key references a single parent entity.
+- Master data cannot be deleted while referenced by transactional data.
+- Transactional history is preserved indefinitely.
+
+---
+
+# 8. Enum Reference
+
+Pharmora intentionally avoids database ENUM types.
+
+Business values are stored as strings and validated within the Laravel application layer.
+
+This approach improves portability, maintainability, and simplifies future business changes.
+
+---
+
+## Category Status
+
+| Value | Description |
+|--------|-------------|
+| active | Category is available for use |
+| inactive | Category is disabled |
+
+---
+
+## Supplier Status
+
+| Value | Description |
+|--------|-------------|
+| active | Supplier is active |
+| inactive | Supplier is inactive |
+
+---
+
+## Product Status
+
+| Value | Description |
+|--------|-------------|
+| active | Product can participate in inventory operations |
+| inactive | Product is archived but retained for historical purposes |
+
+---
+
+## Inventory Movement Type
+
+| Value | Description |
+|--------|-------------|
+| stock_in | Increase inventory quantity |
+| stock_out | Decrease inventory quantity |
+
+Future versions may introduce additional movement types without requiring database schema changes.
+
+---
+
+# 9. Index Reference
+
+The following indexes are implemented to improve database performance.
+
+---
+
+## Users
+
+| Column | Index Type |
+|---------|------------|
+| id | Primary Key |
+| uuid | Unique |
+| email | Unique |
+
+---
+
+## Organization Settings
+
+| Column | Index Type |
+|---------|------------|
+| id | Primary Key |
+
+---
+
+## Categories
+
+| Column | Index Type |
+|---------|------------|
+| id | Primary Key |
+| uuid | Unique |
+| code | Unique |
+| name | Unique |
+| status | Index |
+
+---
+
+## Suppliers
+
+| Column | Index Type |
+|---------|------------|
+| id | Primary Key |
+| uuid | Unique |
+| code | Unique |
+| name | Unique |
+| status | Index |
+
+---
+
+## Products
+
+| Column | Index Type |
+|---------|------------|
+| id | Primary Key |
+| uuid | Unique |
+| sku | Unique |
+| barcode | Unique |
+| category_id | Foreign Key Index |
+| supplier_id | Foreign Key Index |
+| status | Index |
+| current_stock | Index |
+
+---
+
+## Inventory Movements
+
+| Column | Index Type |
+|---------|------------|
+| id | Primary Key |
+| uuid | Unique |
+| product_id | Foreign Key Index |
+| user_id | Foreign Key Index |
+| movement_type | Index |
+| created_at | Index |
+
+---
+
+# 10. UUID Strategy
+
+Pharmora uses a dual-identifier strategy.
+
+Every table maintains an auto-incrementing primary key for internal relationships while exposing UUIDs as public identifiers.
+
+---
+
+## Objectives
+
+- Prevent identifier enumeration.
+- Improve API compatibility.
+- Improve URL security.
+- Maintain database performance.
+- Preserve Laravel conventions.
+
+---
+
+## UUID-enabled Tables
+
+| Table | UUID |
+|--------|------|
+| Users | Yes |
+| Categories | Yes |
+| Suppliers | Yes |
+| Products | Yes |
+| Inventory Movements | Yes |
+| Organization Settings | No |
+
+Organization Settings intentionally excludes UUID because it represents a single application-wide configuration record.
+
+---
+
+# 11. Soft Delete Strategy
+
+Soft Deletes are applied only to master data.
+
+This preserves historical relationships while allowing administrators to archive records.
+
+---
+
+## Tables Using Soft Deletes
+
+| Table | Soft Deletes |
+|--------|--------------|
+| Users | Yes |
+| Categories | Yes |
+| Suppliers | Yes |
+| Products | Yes |
+
+---
+
+## Tables Without Soft Deletes
+
+| Table | Reason |
+|--------|--------|
+| Organization Settings | Single configuration record |
+| Inventory Movements | Immutable audit history |
+
+---
+
+# 12. Timestamp Strategy
+
+Timestamp behavior differs depending on the responsibility of each table.
+
+---
+
+## Standard Tables
+
+The following tables use Laravel's standard timestamp behavior.
+
+| Table |
+|-------|
+| Users |
+| Organization Settings |
+| Categories |
+| Suppliers |
+| Products |
+
+Implementation:
+
+```php
+$table->timestamps();
+```
+
+---
+
+## Immutable Tables
+
+Inventory Movements intentionally records only the creation time.
+
+```php
+$table->timestamp('created_at');
+```
+
+No `updated_at` column is implemented because inventory history is immutable.
+
+---
+
+# 13. Related Documents
+
+This document should be read together with the following project documentation.
+
+### Foundation
+
+- Master Project Brief
+- Product Requirement Document
+
+### Database
+
+- Database Design
+- Entity Relationship Diagram (ERD)
+- Database Schema Freeze
+- Database Review Documents
+- Database Enum Strategy
+
+### Architecture
+
+- ADR-001 — Inventory Movements
+- ADR-002 — Product Status Strategy
+- ADR-003 — Current Stock Strategy
+- ADR-004 — UUID Strategy
+- ADR-005 — Soft Delete Strategy
+- ADR-006 — Organization Settings Strategy
+- ADR-007 — Inventory Movement Strategy
+- ADR-008 — Immutable Inventory History
+
+---
+
+# 14. Closing
+
+The Data Dictionary defines the official database specification for Pharmora MVP Version 1.0.
+
+Together with the Entity Relationship Diagram (ERD), Architecture Decision Records (ADR), Database Design documentation, and Schema Freeze documentation, this document establishes a complete and consistent foundation for implementing the application's database layer.
+
+The Data Dictionary serves as the authoritative reference for:
+
+- Laravel Migrations
+- Eloquent Models
+- Database Seeders
+- Model Factories
+- Validation Rules
+- API Resources
+- Backend Development
+- Future System Enhancements
+
+All future database changes should maintain compatibility with the architectural principles documented throughout this project.
+
+Structural modifications introduced after the approved schema baseline should be documented through a new Architecture Decision Record (ADR) and implemented using versioned Laravel migrations to ensure long-term maintainability and consistency.
