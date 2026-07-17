@@ -672,3 +672,200 @@ Possible additions include:
 - Backup Settings
 
 These features are intentionally excluded from the MVP scope.
+
+# Categories
+
+## Purpose
+
+The **Categories** table stores product classifications used to organize inventory within the Pharmora platform.
+
+Categories simplify inventory management by grouping similar products into logical business classifications.
+
+Examples include:
+
+- Antibiotics
+- Vitamins
+- Medical Devices
+- Personal Care
+- Baby Care
+
+Each Product must belong to exactly one Category.
+
+---
+
+## Business Responsibility
+
+The Categories entity is responsible for:
+
+- Product classification
+- Inventory organization
+- Product filtering
+- Dashboard statistics
+- Reporting aggregation
+
+Categories represent relatively static master data and therefore support Soft Deletes instead of permanent deletion.
+
+---
+
+## Business Rules
+
+The Categories table follows these business rules:
+
+- Every Category must have a unique Code.
+- Every Category must have a unique Name.
+- Category names should remain descriptive and human-readable.
+- Categories may exist without any Products.
+- Categories cannot be permanently deleted while still referenced by Products.
+- Categories may be marked as inactive.
+- Historical Product records must remain valid regardless of Category status.
+
+---
+
+## Column Definitions
+
+| Column | Type | Nullable | Default | Constraint | Description |
+|---------|------|----------|---------|------------|-------------|
+| id | BIGINT | No | Auto Increment | Primary Key | Internal identifier |
+| uuid | UUID | No | Generated | Unique | Public identifier |
+| code | VARCHAR | No | - | Unique | Category code |
+| name | VARCHAR | No | - | Unique | Category name |
+| description | TEXT | Yes | NULL | - | Category description |
+| status | VARCHAR | No | active | - | Business status |
+| created_at | TIMESTAMP | No | Current Timestamp | - | Creation timestamp |
+| updated_at | TIMESTAMP | No | Current Timestamp | - | Last update timestamp |
+| deleted_at | TIMESTAMP | Yes | NULL | Soft Delete | Soft deletion timestamp |
+
+---
+
+## Indexes
+
+| Column | Type | Purpose |
+|---------|------|---------|
+| id | Primary Key | Internal relationship |
+| uuid | Unique | Public identifier |
+| code | Unique | Business identifier |
+| name | Unique | Prevent duplicate categories |
+| status | Index | Dashboard filtering |
+
+---
+
+## Constraints
+
+| Constraint | Description |
+|------------|-------------|
+| Primary Key | id |
+| Unique | uuid |
+| Unique | code |
+| Unique | name |
+| Soft Deletes | Enabled |
+
+---
+
+## Relationships
+
+| Relationship | Type |
+|--------------|------|
+| Category → Products | One-to-Many |
+
+One Category may classify many Products.
+
+Each Product must belong to exactly one Category.
+
+---
+
+## Laravel Mapping
+
+```php
+class Category extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'uuid',
+        'code',
+        'name',
+        'description',
+        'status',
+    ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+}
+```
+
+---
+
+## Business Notes
+
+Categories provide a logical structure for organizing inventory.
+
+Typical use cases include:
+
+- Product grouping
+- Inventory filtering
+- Dashboard statistics
+- Stock analysis
+- Report generation
+- Search optimization
+
+Categories are not intended to represent product brands or manufacturers.
+
+---
+
+## Lifecycle
+
+```
+Create
+    │
+    ▼
+Active
+    │
+    ├──────────────┐
+    ▼              │
+Inactive           │
+    │              │
+    ▼              │
+Restore ◄──────────┘
+```
+
+Categories should be marked as **Inactive** instead of being deleted whenever possible.
+
+Soft Deletes should only be used when a Category is no longer required and is not referenced by active Products.
+
+---
+
+## Architectural Decisions
+
+The Categories table follows the decisions defined in:
+
+- ADR-002 — Product Status Strategy
+- ADR-004 — UUID Strategy
+- ADR-005 — Soft Delete Strategy
+
+Key architectural decisions include:
+
+- UUID for public identification
+- Business code for internal reference
+- String-based status values
+- Soft Deletes for master data
+
+---
+
+## Future Considerations
+
+Future versions of Pharmora may extend Categories with additional capabilities.
+
+Potential enhancements include:
+
+- Category icons
+- Category colors
+- Parent-child categories
+- Nested category hierarchy
+- Display ordering
+- Category images
+- SEO metadata
+- Multi-language support
+
+These features are intentionally excluded from the MVP scope.
