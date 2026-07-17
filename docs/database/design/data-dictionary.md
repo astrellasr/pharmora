@@ -502,3 +502,173 @@ Potential future additions include:
 These features are intentionally excluded from the current MVP scope.
 
 ---
+
+# Organization Settings
+
+## Purpose
+
+The **Organization Settings** table stores global application configuration shared across the entire Pharmora workspace.
+
+Unlike business entities such as Products or Suppliers, Organization Settings does not represent transactional business data.
+
+Instead, it stores information that defines the identity and preferences of the organization using the application.
+
+Only one record is expected to exist within the MVP scope.
+
+---
+
+## Business Responsibility
+
+The Organization Settings entity is responsible for:
+
+- Organization identity
+- Workspace branding
+- Default application preferences
+- Localization settings
+- Business profile information
+
+The data stored within this table is referenced by multiple modules throughout the application but is not directly related through foreign key relationships.
+
+---
+
+## Business Rules
+
+The Organization Settings table follows these business rules:
+
+- Only one record should exist within the application.
+- Organization Settings does not participate in foreign key relationships.
+- UUID is intentionally omitted because the entity is never exposed through public URLs.
+- The record may be updated by authorized administrators.
+- Soft Deletes are not implemented because the application always requires one active configuration.
+
+---
+
+## Column Definitions
+
+| Column | Type | Nullable | Default | Constraint | Description |
+|---------|------|----------|---------|------------|-------------|
+| id | BIGINT | No | Auto Increment | Primary Key | Internal identifier |
+| organization_name | VARCHAR | No | - | - | Organization name |
+| business_type | VARCHAR | No | - | - | Business category |
+| workspace_email | VARCHAR | No | - | - | Official organization email |
+| phone | VARCHAR | Yes | NULL | - | Contact number |
+| address | TEXT | Yes | NULL | - | Organization address |
+| country | VARCHAR | Yes | NULL | - | Country |
+| timezone | VARCHAR | No | Asia/Jakarta | - | Default timezone |
+| language | VARCHAR | No | id | - | Default application language |
+| logo | VARCHAR | Yes | NULL | - | Organization logo path |
+| created_at | TIMESTAMP | No | Current Timestamp | - | Creation timestamp |
+| updated_at | TIMESTAMP | No | Current Timestamp | - | Last update timestamp |
+
+---
+
+## Indexes
+
+| Column | Type | Purpose |
+|---------|------|---------|
+| id | Primary Key | Internal identifier |
+
+No additional indexes are required within the MVP because this table stores only a single record.
+
+---
+
+## Constraints
+
+| Constraint | Description |
+|------------|-------------|
+| Primary Key | id |
+| UUID | Not Implemented |
+| Soft Deletes | Not Implemented |
+
+---
+
+## Relationships
+
+Organization Settings is intentionally designed as an independent configuration entity.
+
+The table does not contain foreign keys and is not referenced by other tables.
+
+This simplifies the configuration layer while avoiding unnecessary relational complexity.
+
+---
+
+## Laravel Mapping
+
+```php
+class OrganizationSetting extends Model
+{
+    protected $fillable = [
+        'organization_name',
+        'business_type',
+        'workspace_email',
+        'phone',
+        'address',
+        'country',
+        'timezone',
+        'language',
+        'logo',
+    ];
+}
+```
+
+---
+
+## Business Notes
+
+Organization Settings centralizes workspace-level configuration.
+
+Typical examples include:
+
+- Organization Name
+- Pharmacy Name
+- Clinic Name
+- Medical Supplier Name
+- Business Contact
+- Workspace Logo
+- Language
+- Timezone
+
+This information may be displayed throughout the application, including:
+
+- Dashboard
+- Settings
+- Login Branding
+- Exported Reports
+- PDF Documents
+
+---
+
+## Architectural Decisions
+
+The Organization Settings table follows the decisions defined in:
+
+- ADR-006 — Organization Settings Strategy
+
+Key architectural decisions include:
+
+- Single-row configuration table
+- Independent entity
+- No UUID
+- No foreign keys
+- No Soft Deletes
+
+---
+
+## Future Considerations
+
+Future versions of Pharmora may extend this table with additional configuration options.
+
+Possible additions include:
+
+- Currency
+- Date Format
+- Time Format
+- Theme
+- Dark Mode
+- Tax Configuration
+- Company Registration Number
+- Business License Number
+- SMTP Configuration
+- Backup Settings
+
+These features are intentionally excluded from the MVP scope.
