@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -16,6 +17,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | Identifiers
             |--------------------------------------------------------------------------
+            |
             */
 
             $table->id();
@@ -25,6 +27,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | Relationships
             |--------------------------------------------------------------------------
+            |
             */
 
             $table->foreignId('product_id')
@@ -39,6 +42,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | Movement Information
             |--------------------------------------------------------------------------
+            |
             */
 
             $table->string('movement_type');
@@ -51,6 +55,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | Timestamp
             |--------------------------------------------------------------------------
+            |
             */
 
             $table->timestamp('created_at')->useCurrent();
@@ -59,11 +64,25 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | Indexes
             |--------------------------------------------------------------------------
+            |
             */
 
             $table->index('movement_type');
             $table->index('created_at');
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Constraints
+        |--------------------------------------------------------------------------
+        |
+        */
+
+        DB::statement("
+            ALTER TABLE inventory_movements
+            ADD CONSTRAINT chk_inventory_movements_quantity
+            CHECK (quantity > 0)
+        ");
     }
 
     /**
@@ -71,6 +90,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        DB::statement("
+            ALTER TABLE inventory_movements
+            DROP CONSTRAINT IF EXISTS chk_inventory_movements_quantity
+        ");
+
         Schema::dropIfExists('inventory_movements');
     }
 };
