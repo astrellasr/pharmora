@@ -869,3 +869,205 @@ Potential enhancements include:
 - Multi-language support
 
 These features are intentionally excluded from the MVP scope.
+
+# Suppliers
+
+## Purpose
+
+The **Suppliers** table stores information about organizations that provide products to the business.
+
+Suppliers represent external business partners responsible for supplying inventory items managed within Pharmora.
+
+Each Product must reference exactly one Supplier.
+
+---
+
+## Business Responsibility
+
+The Suppliers entity is responsible for:
+
+- Supplier master data
+- Product sourcing
+- Procurement reference
+- Inventory traceability
+- Business reporting
+
+Suppliers are considered master data and therefore support Soft Deletes instead of permanent deletion.
+
+---
+
+## Business Rules
+
+The Suppliers table follows these business rules:
+
+- Every Supplier must have a unique Code.
+- Every Supplier must have a unique Name.
+- Suppliers may exist without supplying any Products.
+- Suppliers cannot be permanently deleted while still referenced by Products.
+- Suppliers may be marked as inactive.
+- Historical Product records must continue referencing their original Supplier.
+- Supplier information should remain stable to preserve inventory history.
+
+---
+
+## Column Definitions
+
+| Column | Type | Nullable | Default | Constraint | Description |
+|---------|------|----------|---------|------------|-------------|
+| id | BIGINT | No | Auto Increment | Primary Key | Internal identifier |
+| uuid | UUID | No | Generated | Unique | Public identifier |
+| code | VARCHAR | No | - | Unique | Supplier code |
+| name | VARCHAR | No | - | Unique | Supplier name |
+| contact_person | VARCHAR | Yes | NULL | - | Primary contact person |
+| email | VARCHAR | Yes | NULL | - | Supplier email |
+| phone | VARCHAR | Yes | NULL | - | Supplier phone number |
+| address | TEXT | Yes | NULL | - | Supplier address |
+| status | VARCHAR | No | active | - | Business status |
+| created_at | TIMESTAMP | No | Current Timestamp | - | Creation timestamp |
+| updated_at | TIMESTAMP | No | Current Timestamp | - | Last update timestamp |
+| deleted_at | TIMESTAMP | Yes | NULL | Soft Delete | Soft deletion timestamp |
+
+---
+
+## Indexes
+
+| Column | Type | Purpose |
+|---------|------|---------|
+| id | Primary Key | Internal relationship |
+| uuid | Unique | Public identifier |
+| code | Unique | Business identifier |
+| name | Unique | Prevent duplicate suppliers |
+| status | Index | Dashboard filtering |
+
+---
+
+## Constraints
+
+| Constraint | Description |
+|------------|-------------|
+| Primary Key | id |
+| Unique | uuid |
+| Unique | code |
+| Unique | name |
+| Soft Deletes | Enabled |
+
+Email and phone numbers are intentionally **not** marked as Unique because different supplier branches or representatives may legitimately share contact information.
+
+---
+
+## Relationships
+
+| Relationship | Type |
+|--------------|------|
+| Supplier → Products | One-to-Many |
+
+One Supplier may provide multiple Products.
+
+Each Product must belong to exactly one Supplier.
+
+---
+
+## Laravel Mapping
+
+```php
+class Supplier extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'uuid',
+        'code',
+        'name',
+        'contact_person',
+        'email',
+        'phone',
+        'address',
+        'status',
+    ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+}
+```
+
+---
+
+## Business Notes
+
+Suppliers represent external organizations rather than individual employees.
+
+Typical supplier information includes:
+
+- Pharmaceutical distributors
+- Medical equipment providers
+- Healthcare wholesalers
+- Local medicine suppliers
+
+Supplier information supports:
+
+- Product traceability
+- Procurement management
+- Inventory reporting
+- Future purchase order implementation
+
+---
+
+## Lifecycle
+
+```
+Create
+    │
+    ▼
+Active
+    │
+    ├──────────────┐
+    ▼              │
+Inactive           │
+    │              │
+    ▼              │
+Restore ◄──────────┘
+```
+
+Suppliers should generally be marked as **Inactive** instead of being deleted.
+
+Soft Deletes are reserved for suppliers that are permanently removed from business operations while ensuring historical Product references remain valid.
+
+---
+
+## Architectural Decisions
+
+The Suppliers table follows the decisions defined in:
+
+- ADR-004 — UUID Strategy
+- ADR-005 — Soft Delete Strategy
+
+Key architectural decisions include:
+
+- UUID for secure public identification
+- Business code for internal reference
+- String-based status values
+- Soft Deletes for master data
+- Historical relationship preservation
+
+---
+
+## Future Considerations
+
+Future versions of Pharmora may extend Suppliers with additional capabilities.
+
+Potential enhancements include:
+
+- Supplier logo
+- Tax identification number
+- Bank account information
+- Payment terms
+- Purchase Order integration
+- Supplier rating
+- Contract management
+- Delivery lead time
+- Multiple contact persons
+- Vendor performance analytics
+
+These features are intentionally excluded from the MVP scope.
