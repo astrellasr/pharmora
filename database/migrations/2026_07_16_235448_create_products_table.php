@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -82,6 +83,24 @@ return new class extends Migration
             $table->index('status');
             $table->index('current_stock');
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Constraints
+        |--------------------------------------------------------------------------
+        */
+
+        DB::statement("
+            ALTER TABLE products
+            ADD CONSTRAINT chk_products_current_stock
+            CHECK (current_stock >= 0)
+        ");
+
+        DB::statement("
+            ALTER TABLE products
+            ADD CONSTRAINT chk_products_minimum_stock
+            CHECK (minimum_stock >= 0)
+        ");
     }
 
     /**
@@ -89,6 +108,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        DB::statement("
+            ALTER TABLE products
+            DROP CONSTRAINT IF EXISTS chk_products_current_stock
+        ");
+
+        DB::statement("
+            ALTER TABLE products
+            DROP CONSTRAINT IF EXISTS chk_products_minimum_stock
+        ");
+
         Schema::dropIfExists('products');
     }
 };
