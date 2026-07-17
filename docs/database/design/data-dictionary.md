@@ -1071,3 +1071,290 @@ Potential enhancements include:
 - Vendor performance analytics
 
 These features are intentionally excluded from the MVP scope.
+
+# Products
+
+## Purpose
+
+The **Products** table stores all inventory items managed within the Pharmora platform.
+
+Products represent the core business entity of the application and serve as the primary source of truth for inventory information.
+
+Each Product belongs to exactly one Category and one Supplier while maintaining its own inventory state through Inventory Movements.
+
+The Products table is intentionally designed to support both current inventory operations and future business expansion.
+
+---
+
+## Business Responsibility
+
+The Products entity is responsible for:
+
+- Product master data
+- Inventory information
+- Product identification
+- Stock monitoring
+- Low stock alerts
+- Inventory reporting
+- Supplier association
+- Category classification
+
+Products represent master data and therefore support Soft Deletes instead of permanent deletion.
+
+---
+
+## Business Rules
+
+The Products table follows these business rules:
+
+- Every Product must have a unique UUID.
+- Every Product must have a unique SKU.
+- Every Product may optionally have a Barcode.
+- Every Product belongs to exactly one Category.
+- Every Product belongs to exactly one Supplier.
+- Current Stock must never be negative.
+- Minimum Stock must be zero or greater.
+- Products may exist without Inventory Movements.
+- Products may be marked as inactive.
+- Historical Inventory Movements must remain valid regardless of Product status.
+
+---
+
+## Column Definitions
+
+| Column | Type | Nullable | Default | Constraint | Description |
+|---------|------|----------|---------|------------|-------------|
+| id | BIGINT | No | Auto Increment | Primary Key | Internal identifier |
+| uuid | UUID | No | Generated | Unique | Public identifier |
+| category_id | BIGINT | No | - | Foreign Key | Product category |
+| supplier_id | BIGINT | No | - | Foreign Key | Product supplier |
+| sku | VARCHAR | No | - | Unique | Stock Keeping Unit |
+| barcode | VARCHAR | Yes | NULL | Unique | Product barcode |
+| name | VARCHAR | No | - | - | Product name |
+| description | TEXT | Yes | NULL | - | Product description |
+| current_stock | INTEGER | No | 0 | - | Current inventory quantity |
+| minimum_stock | INTEGER | No | 0 | - | Minimum stock threshold |
+| status | VARCHAR | No | active | - | Business status |
+| created_at | TIMESTAMP | No | Current Timestamp | - | Creation timestamp |
+| updated_at | TIMESTAMP | No | Current Timestamp | - | Last update timestamp |
+| deleted_at | TIMESTAMP | Yes | NULL | Soft Delete | Soft deletion timestamp |
+
+---
+
+## Indexes
+
+| Column | Type | Purpose |
+|---------|------|---------|
+| id | Primary Key | Internal relationship |
+| uuid | Unique | Public identifier |
+| sku | Unique | Product identification |
+| barcode | Unique | Barcode scanning |
+| category_id | Foreign Key Index | Relationship |
+| supplier_id | Foreign Key Index | Relationship |
+| status | Index | Filtering |
+| current_stock | Index | Low stock monitoring |
+
+---
+
+## Constraints
+
+| Constraint | Description |
+|------------|-------------|
+| Primary Key | id |
+| Unique | uuid |
+| Unique | sku |
+| Unique | barcode |
+| Foreign Key | category_id |
+| Foreign Key | supplier_id |
+| Soft Deletes | Enabled |
+
+Foreign key deletion strategy:
+
+- Category → RESTRICT
+- Supplier → RESTRICT
+
+This ensures Products always maintain valid business relationships.
+
+---
+
+## Relationships
+
+| Relationship | Type |
+|--------------|------|
+| Category → Products | Many-to-One |
+| Supplier → Products | Many-to-One |
+| Product → Inventory Movements | One-to-Many |
+
+Each Product belongs to one Category and one Supplier.
+
+Each Product may generate multiple Inventory Movement records during its lifecycle.
+
+---
+
+## Laravel Mapping
+
+```php
+class Product extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'uuid',
+        'category_id',
+        'supplier_id',
+        'sku',
+        'barcode',
+        'name',
+        'description',
+        'current_stock',
+        'minimum_stock',
+        'status',
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function inventoryMovements()
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
+}
+```
+
+---
+
+## Business Notes
+
+Products represent physical inventory items managed by the organization.
+
+Typical examples include:
+
+- Medicines
+- Medical devices
+- Vitamins
+- Healthcare products
+- Medical consumables
+
+Products serve as the central entity for nearly every operational module within Pharmora.
+
+---
+
+## Inventory Strategy
+
+Pharmora implements a **controlled denormalization** strategy.
+
+Current inventory quantity is stored directly within the Products table.
+
+Inventory history is stored separately within Inventory Movements.
+
+Benefits include:
+
+- Faster dashboard loading
+- Faster product listing
+- Efficient stock availability checks
+- Reduced aggregation queries
+
+Historical accuracy is preserved through immutable Inventory Movements.
+
+---
+
+## Stock Rules
+
+Current Stock
+
+- Cannot be negative.
+- Updated automatically after every Inventory Movement.
+- Used by Dashboard KPIs.
+
+Minimum Stock
+
+- Cannot be negative.
+- Used to generate Low Stock Alerts.
+- Supports inventory monitoring.
+
+---
+
+## Product Status
+
+Approved values:
+
+- active
+- inactive
+
+Products marked as **inactive**:
+
+- Cannot receive new inventory transactions.
+- Remain visible within historical reports.
+- Preserve existing Inventory Movement records.
+
+---
+
+## Lifecycle
+
+```
+Create
+    │
+    ▼
+Active
+    │
+    ├─────────────┐
+    ▼             │
+Inactive          │
+    │             │
+    ▼             │
+Restore ◄─────────┘
+```
+
+Products should generally be marked as **Inactive** instead of being permanently deleted.
+
+Soft Deletes are reserved for products that are no longer required while preserving historical relationships.
+
+---
+
+## Architectural Decisions
+
+The Products table follows the decisions defined in:
+
+- ADR-002 — Product Status Strategy
+- ADR-003 — Current Stock Strategy
+- ADR-004 — UUID Strategy
+- ADR-005 — Soft Delete Strategy
+
+Key architectural decisions include:
+
+- UUID public identifier
+- Controlled denormalization using current_stock
+- Inventory calculated through Inventory Movements
+- String-based status values
+- Soft Deletes for master data
+
+---
+
+## Future Considerations
+
+Future versions of Pharmora may extend Products with additional capabilities.
+
+Potential enhancements include:
+
+- Product image
+- Brand
+- Manufacturer
+- Batch number
+- Expiration date
+- Purchase price
+- Selling price
+- Unit conversion
+- Tax configuration
+- Multi-warehouse stock
+- QR Code support
+- Barcode scanner integration
+- Product variants
+
+These features are intentionally excluded from the MVP scope.
