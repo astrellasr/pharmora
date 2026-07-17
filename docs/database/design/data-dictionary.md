@@ -1,7 +1,7 @@
 # 📄 Data Dictionary
 
-> **Version:** 1.0  
-> **Status:** Final  
+> **Version:** 2.0  
+> **Status:** Approved & Frozen  
 > **Document Type:** Data Dictionary  
 > **Project:** Pharmora  
 > **Prepared by:** Astrella Syadira Ramadhante  
@@ -13,396 +13,492 @@
 
 - [1. Purpose](#1-purpose)
 - [2. Database Overview](#2-database-overview)
-- [3. Naming Conventions](#3-naming-conventions)
-- [4. Table Definitions](#4-table-definitions)
-  - [Users](#users)
-  - [Categories](#categories)
-  - [Suppliers](#suppliers)
-  - [Products](#products)
-  - [Inventory Transactions](#inventory-transactions)
-- [5. Relationship Summary](#5-relationship-summary)
-- [6. Design Notes](#6-design-notes)
-- [7. Closing](#7-closing)
+- [3. Database Statistics](#3-database-statistics)
+- [4. Naming Conventions](#4-naming-conventions)
+- [5. Data Type Standards](#5-data-type-standards)
+- [6. Table Definitions](#6-table-definitions)
+  - Users
+  - Organization Settings
+  - Categories
+  - Suppliers
+  - Products
+  - Inventory Movements
+- [7. Relationship Summary](#7-relationship-summary)
+- [8. Enum Reference](#8-enum-reference)
+- [9. Index Reference](#9-index-reference)
+- [10. UUID Strategy](#10-uuid-strategy)
+- [11. Soft Delete Strategy](#11-soft-delete-strategy)
+- [12. Timestamp Strategy](#12-timestamp-strategy)
+- [13. Related Documents](#13-related-documents)
+- [14. Closing](#14-closing)
 
 ---
 
 # 1. Purpose
 
-This document defines the structure of every database table used in Pharmora.
+This document defines the official data dictionary for the Pharmora database.
 
-Its primary purpose is to provide a complete reference for database implementation by documenting each table, column, data type, key constraint, and business purpose.
+It provides a complete specification of every database table, column, constraint, relationship, and business rule used throughout the application.
 
-Together with the Database Design and Entity Relationship Diagram (ERD), this document serves as the implementation blueprint for Laravel migrations, Eloquent models, database validation, and future maintenance.
+The Data Dictionary acts as the primary implementation reference during backend development and ensures consistency across Laravel migrations, Eloquent models, factories, seeders, validation rules, API resources, and future system enhancements.
 
-Unlike the ERD, which focuses on relationships between entities, the Data Dictionary describes the internal structure of each table in detail.
+Unlike the Entity Relationship Diagram (ERD), which focuses on relationships between entities, this document provides detailed definitions for each individual table and column within the database.
 
-The Data Dictionary supports the following objectives:
+The Data Dictionary serves the following objectives:
 
-- Define every database table used within the application.
-- Document all columns, data types, and key constraints.
-- Standardize database naming conventions.
-- Improve consistency during development.
-- Serve as the primary reference for Laravel migrations and database maintenance.
+- Define every database table.
+- Define every database column.
+- Standardize naming conventions.
+- Define database constraints.
+- Document business rules.
+- Support Laravel migration development.
+- Improve long-term maintainability.
+- Serve as the single source of truth for database implementation.
 
-This document covers only the entities included in the MVP scope of Pharmora and remains fully aligned with the project's Database Design and Entity Relationship Diagram.
+This document reflects the finalized database architecture for **Pharmora MVP Version 1.0**.
 
 ---
 
 # 2. Database Overview
 
-The Pharmora database is designed using a relational database model to support inventory management operations for healthcare businesses.
+Pharmora uses a relational database designed around modern normalization principles while remaining practical for real-world inventory management.
 
-The database consists of five core entities that represent both master data and transactional data.
+The database separates business data into three major categories.
 
 ## Master Data
 
-Master data stores relatively stable business information that serves as the foundation for inventory operations.
+Master data stores relatively static business information.
+
+Current master entities include:
 
 - Users
 - Categories
 - Suppliers
 - Products
 
-## Transactional Data
-
-Transactional data records operational activities performed within the inventory management process.
-
-- Inventory Transactions
-
-This separation improves data organization, simplifies maintenance, and supports future scalability without introducing unnecessary complexity.
+Master data supports Soft Deletes to preserve historical relationships while allowing administrators to deactivate records safely.
 
 ---
 
-# 3. Naming Conventions
+## Configuration Data
 
-To ensure consistency throughout the application, the database follows Laravel naming conventions and modern relational database design practices.
+Configuration data stores application-wide settings shared across the entire system.
 
-## Table Naming
+Current configuration entity:
 
-- Table names use **snake_case**.
-- Table names use **plural nouns**.
-- All table names are written in lowercase.
+- Organization Settings
+
+Unlike business entities, configuration data exists independently and does not participate in foreign key relationships.
+
+---
+
+## Transactional Data
+
+Transactional data records operational activities performed by users.
+
+Current transactional entity:
+
+- Inventory Movements
+
+Transactional data is immutable and represents the historical audit trail of inventory operations.
+
+Records are never modified or deleted after creation.
+
+---
+
+## Database Design Principles
+
+The database architecture follows the following principles:
+
+- Business-first design
+- Third Normal Form (3NF)
+- UUID-based public identifiers
+- Immutable inventory history
+- Controlled denormalization for inventory performance
+- Laravel naming conventions
+- PostgreSQL compatibility
+- Future extensibility
+
+These principles are documented throughout the project's Architecture Decision Records (ADR).
+
+---
+
+# 3. Database Statistics
+
+The finalized Pharmora MVP database consists of the following components.
+
+| Metric | Value |
+|---------|------:|
+| Total Tables | 6 |
+| Master Data Tables | 4 |
+| Configuration Tables | 1 |
+| Transaction Tables | 1 |
+| Total Relationships | 4 |
+| Relationship Type | One-to-Many (1:N) |
+| UUID-enabled Tables | 5 |
+| Soft Delete Tables | 4 |
+| Immutable Tables | 1 |
+
+---
+
+## Entity Summary
+
+| Entity | Category |
+|---------|----------|
+| Users | Master Data |
+| Organization Settings | Configuration |
+| Categories | Master Data |
+| Suppliers | Master Data |
+| Products | Master Data |
+| Inventory Movements | Transactional Data |
+
+---
+
+## Database Engine
+
+| Item | Value |
+|------|-------|
+| Database | PostgreSQL |
+| Framework | Laravel 12 |
+| ORM | Eloquent ORM |
+| Primary Key Strategy | Auto Increment BIGINT |
+| Public Identifier | UUID |
+| Timestamp Strategy | Laravel Timestamps |
+| Soft Delete Strategy | Laravel Soft Deletes |
+
+---
+
+# 4. Naming Conventions
+
+To ensure consistency across the project, the following naming conventions are applied throughout the database.
+
+## Table Names
+
+All database tables use plural snake_case.
 
 Examples:
 
-```text
+```
+
 users
+products
 categories
 suppliers
-products
-inventory_transactions
+inventory_movements
+
 ```
 
 ---
 
-## Column Naming
+## Column Names
 
-- Column names use **snake_case**.
-- Column names should clearly describe their purpose.
-- Avoid abbreviations unless they are widely recognized.
+All columns use snake_case.
 
 Examples:
 
-```text
-category_id
-supplier_id
-product_id
-user_id
+```
+
+organization_name
+workspace_email
+current_stock
 minimum_stock
-transaction_type
+movement_type
 created_at
-updated_at
+
 ```
 
 ---
 
 ## Primary Keys
 
-Every table contains a single primary key.
+Every table uses the default Laravel primary key convention.
 
-Naming convention:
-
-```text
-id
 ```
 
-Primary keys use the `bigint` data type and are automatically generated by Laravel.
+id
+
+```
+
+Type:
+
+```
+
+BIGINT UNSIGNED
+
+```
 
 ---
 
 ## Foreign Keys
 
-Foreign keys follow the `{table_singular}_id` convention.
+Foreign keys follow Laravel naming conventions.
 
 Examples:
 
-```text
+```
+
 category_id
 supplier_id
 product_id
 user_id
+
 ```
 
-Each foreign key references the primary key of its related table.
+---
+
+## UUID Columns
+
+Every business entity exposes a UUID for public identification.
+
+Column name:
+
+```
+
+uuid
+
+```
+
+UUIDs are never used as primary keys.
+
+Instead, they provide secure public identifiers for URLs and future API integrations.
 
 ---
 
 ## Timestamp Columns
 
-Every table includes Laravel's default timestamp columns.
+Laravel timestamp conventions are used consistently.
 
-```text
-created_at
-updated_at
 ```
 
-These columns support auditing, data tracking, and future maintenance.
+created_at
+updated_at
+
+```
+
+Inventory Movements intentionally omit `updated_at` according to the Immutable Inventory History strategy.
 
 ---
 
-## Data Type Standards
+## Soft Delete Columns
 
-The following data types are used consistently throughout the database.
+Applicable tables use the standard Laravel convention.
 
-| Data Type | Usage |
-|------------|-------|
-| `bigint` | Primary keys and foreign keys |
-| `varchar` | Short text values |
-| `text` | Long descriptions and notes |
-| `integer` | Numeric quantities |
-| `enum` | Predefined values such as transaction types |
-| `timestamp` | Record creation and update timestamps |
+```
 
-These conventions ensure consistency across the database while remaining fully compatible with Laravel and PostgreSQL.
+deleted_at
+
+```
 
 ---
 
-# 4. Table Definitions
+## Boolean Values
 
-## Users
+Business status values are stored as strings rather than database ENUM or BOOLEAN types.
 
-### Purpose
+Examples:
 
-The `users` table stores administrator account information used to authenticate and access the Pharmora system.
+```
 
-Within the MVP scope, the system supports a single user role: **Inventory Administrator**.
+active
+inactive
 
-This table follows Laravel's default authentication structure and provides a foundation for future user management enhancements.
+```
 
-### Column Definition
-
-| Column | Data Type | Nullable | Key | Description |
-|---------|-----------|----------|-----|-------------|
-| id | bigint | No | PK | Unique identifier for each user. |
-| name | varchar(255) | No | | Administrator's full name. |
-| email | varchar(255) | No | Unique | Email address used for login. |
-| password | varchar(255) | No | | Encrypted user password. |
-| created_at | timestamp | No | | Record creation timestamp. |
-| updated_at | timestamp | No | | Record last update timestamp. |
-
-### Business Notes
-
-- Each user represents one Inventory Administrator.
-- Email addresses must be unique.
-- Passwords are stored using Laravel's built-in hashing mechanism.
-- Every inventory transaction records the administrator responsible for the operation.
+Validation is handled within Laravel rather than the database layer.
 
 ---
 
-## Categories
+# 5. Data Type Standards
 
-### Purpose
+The following standards define the approved database data types used throughout Pharmora.
 
-The `categories` table stores product classifications used to organize inventory.
-
-Each product belongs to exactly one category, allowing inventory to be grouped consistently and making search, filtering, and reporting more efficient.
-
-### Column Definition
-
-| Column | Data Type | Nullable | Key | Description |
-|---------|-----------|----------|-----|-------------|
-| id | bigint | No | PK | Unique identifier for each category. |
-| name | varchar(100) | No | Unique | Category name. |
-| description | text | Yes | | Additional information about the category. |
-| created_at | timestamp | No | | Record creation timestamp. |
-| updated_at | timestamp | No | | Record last update timestamp. |
-
-### Business Notes
-
-- Category names should be unique.
-- A category may contain multiple products.
-- Every product must belong to one valid category.
-- Categories help organize inventory and improve data consistency.
+| Business Value | Laravel Migration | PostgreSQL Type |
+|----------------|-------------------|-----------------|
+| Primary Key | `$table->id()` | BIGINT |
+| UUID | `$table->uuid()` | UUID |
+| Name | `$table->string()` | VARCHAR |
+| Email | `$table->string()` | VARCHAR |
+| Phone | `$table->string()` | VARCHAR |
+| Code | `$table->string()` | VARCHAR |
+| SKU | `$table->string()` | VARCHAR |
+| Barcode | `$table->string()` | VARCHAR |
+| Description | `$table->text()` | TEXT |
+| Address | `$table->text()` | TEXT |
+| Quantity | `$table->integer()` | INTEGER |
+| Stock | `$table->integer()` | INTEGER |
+| Status | `$table->string()` | VARCHAR |
+| Timestamp | `$table->timestamps()` | TIMESTAMP |
+| Soft Delete | `$table->softDeletes()` | TIMESTAMP |
 
 ---
 
-## Suppliers
+## Approved Migration Standards
 
-### Purpose
+All Laravel migrations must follow these implementation standards.
 
-The `suppliers` table stores information about businesses or organizations that provide products for inventory.
+### Primary Keys
 
-Supplier data serves as a reference during inventory replenishment and helps maintain accurate records of product sources.
+```php
+$table->id();
+```
 
-### Column Definition
+### UUID
 
-| Column | Data Type | Nullable | Key | Description |
-|---------|-----------|----------|-----|-------------|
-| id | bigint | No | PK | Unique identifier for each supplier. |
-| name | varchar(255) | No | | Supplier name. |
-| email | varchar(255) | Yes | | Supplier email address. |
-| phone | varchar(30) | Yes | | Supplier contact number. |
-| address | text | Yes | | Supplier business address. |
-| created_at | timestamp | No | | Record creation timestamp. |
-| updated_at | timestamp | No | | Record last update timestamp. |
+```php
+$table->uuid('uuid')->unique();
+```
 
-### Business Notes
+### Foreign Keys
 
-- A supplier may provide multiple products.
-- Supplier information supports inventory procurement and product traceability.
-- Email, phone number, and address are optional to accommodate suppliers with limited contact information.
-- Supplier records should be maintained to ensure consistent inventory data.
+```php
+$table->foreignId('category_id')
+      ->constrained()
+      ->restrictOnDelete();
+```
 
----
+### Timestamps
 
-## Products
+```php
+$table->timestamps();
+```
 
-### Purpose
+### Soft Deletes
 
-The `products` table stores all inventory items managed within Pharmora.
+```php
+$table->softDeletes();
+```
 
-Each product belongs to one category and one supplier. Product records serve as the foundation for inventory transactions and stock monitoring throughout the application.
+### Status Fields
 
-### Column Definition
+Business status values are stored as strings.
 
-| Column | Data Type | Nullable | Key | Description |
-|---------|-----------|----------|-----|-------------|
-| id | bigint | No | PK | Unique identifier for each product. |
-| category_id | bigint | No | FK | References the associated product category. |
-| supplier_id | bigint | No | FK | References the associated supplier. |
-| name | varchar(255) | No | | Product name. |
-| sku | varchar(100) | No | Unique | Stock Keeping Unit used to uniquely identify the product. |
-| stock | integer | No | | Current quantity available in inventory. |
-| minimum_stock | integer | No | | Minimum stock threshold used for low-stock monitoring. |
-| unit | varchar(50) | No | | Unit of measurement (e.g., Box, Bottle, Strip). |
-| created_at | timestamp | No | | Record creation timestamp. |
-| updated_at | timestamp | No | | Record last update timestamp. |
+```php
+$table->string('status')->default('active');
+```
 
-### Business Notes
+Database ENUM types are intentionally avoided to improve portability and simplify future business changes.
 
-- Every product must belong to one valid category.
-- Every product must reference one valid supplier.
-- Each product must have a unique SKU.
-- Product stock is updated automatically through Stock In and Stock Out transactions.
-- Product records cannot exist without valid category and supplier references.
-- The `minimum_stock` value is used to identify products that require replenishment.
-- Product stock must never become negative.
+This implementation follows the project's **Database Enum Strategy**.
+
+# 6. Table Definitions
 
 ---
 
-## Inventory Transactions
+# Users
 
-### Purpose
+## Purpose
 
-The `inventory_transactions` table records every inventory movement performed within the system.
+The **Users** table stores authenticated application users who are authorized to access the Pharmora platform.
 
-Each transaction represents either a Stock In or Stock Out activity and serves as the permanent history of inventory operations.
+Within the MVP scope, every authenticated user acts as an **Inventory Administrator** responsible for managing products, suppliers, categories, and inventory operations.
 
-Instead of storing separate records for Stock In and Stock Out, Pharmora centralizes all inventory movements in a single table using a transaction type.
-
-This approach simplifies data management, improves maintainability, and supports future expansion without changing the overall database structure.
-
-### Column Definition
-
-| Column | Data Type | Nullable | Key | Description |
-|---------|-----------|----------|-----|-------------|
-| id | bigint | No | PK | Unique identifier for each inventory transaction. |
-| product_id | bigint | No | FK | References the associated product. |
-| user_id | bigint | No | FK | References the administrator performing the transaction. |
-| transaction_type | enum | No | | Inventory transaction type (`stock_in`, `stock_out`). |
-| quantity | integer | No | | Number of units involved in the transaction. |
-| notes | text | Yes | | Optional notes describing the transaction. |
-| created_at | timestamp | No | | Transaction creation timestamp. |
-| updated_at | timestamp | No | | Transaction last update timestamp. |
-
-### Business Notes
-
-- Every inventory transaction must reference one valid product.
-- Every inventory transaction must record the administrator responsible for the operation.
-- Only two transaction types are supported within the MVP scope: `stock_in` and `stock_out`.
-- Transaction history should never be deleted or modified as it serves as an operational audit trail.
-- Product stock is automatically updated whenever a transaction is successfully recorded.
-- Stock Out transactions must be rejected if the requested quantity exceeds the available stock.
+Users are also recorded as the actor behind every Inventory Movement, providing accountability and supporting future audit capabilities.
 
 ---
 
-# 5. Relationship Summary
+## Business Responsibility
 
-The following table summarizes all foreign key relationships defined within the Pharmora database.
+The Users entity is responsible for:
 
-| Parent Table | Child Table | Relationship | Foreign Key |
-|--------------|-------------|--------------|-------------|
-| users | inventory_transactions | One-to-Many (1:N) | `user_id` |
-| categories | products | One-to-Many (1:N) | `category_id` |
-| suppliers | products | One-to-Many (1:N) | `supplier_id` |
-| products | inventory_transactions | One-to-Many (1:N) | `product_id` |
+- User authentication
+- User identification
+- Inventory operation ownership
+- Audit trail support
+- Future role management
 
-All relationships follow Laravel's conventional foreign key naming standards and enforce referential integrity between related entities.
-
----
-
-# 6. Design Notes
-
-The Data Dictionary has been developed in accordance with the architectural principles established throughout the Pharmora project documentation.
-
-Several implementation decisions have been made to ensure consistency, maintainability, and long-term scalability.
-
-## Laravel-First Design
-
-The database structure follows Laravel conventions for table names, primary keys, foreign keys, and timestamp columns.
-
-Following framework conventions minimizes custom configuration and simplifies future development.
+This table is provided by Laravel Breeze and extended where necessary to support Pharmora's business requirements.
 
 ---
 
-## Business-Oriented Database Structure
+## Business Rules
 
-Each table represents a distinct business entity with a clearly defined responsibility.
+The Users table follows these business rules:
 
-Master data and transactional data are intentionally separated to improve organization and maintain data consistency.
-
----
-
-## Normalized Database Design
-
-The database follows normalization principles by storing each business entity independently and connecting related entities through foreign keys.
-
-This approach minimizes redundancy while preserving data integrity.
+- Every user must have a unique email address.
+- Passwords must always be securely hashed.
+- Email verification is optional for MVP.
+- Users may exist without performing inventory operations.
+- Historical Inventory Movements must continue referencing their original user.
+- Users use Soft Deletes instead of permanent deletion.
 
 ---
 
-## Centralized Inventory Transactions
+## Column Definitions
 
-All inventory movements are recorded in a single transaction table.
-
-Using a `transaction_type` field instead of separate Stock In and Stock Out tables reduces structural complexity while remaining flexible for future enhancements.
+| Column | Type | Nullable | Default | Constraint | Description |
+|---------|------|----------|---------|------------|-------------|
+| id | BIGINT | No | Auto Increment | Primary Key | Internal identifier |
+| uuid | UUID | No | Generated | Unique | Public identifier |
+| name | VARCHAR | No | - | - | Full name |
+| email | VARCHAR | No | - | Unique | Login email |
+| email_verified_at | TIMESTAMP | Yes | NULL | - | Email verification timestamp |
+| password | VARCHAR | No | - | - | Hashed password |
+| remember_token | VARCHAR | Yes | NULL | - | Laravel remember token |
+| created_at | TIMESTAMP | No | Current Timestamp | - | Creation timestamp |
+| updated_at | TIMESTAMP | No | Current Timestamp | - | Last update timestamp |
+| deleted_at | TIMESTAMP | Yes | NULL | Soft Delete | Soft deletion timestamp |
 
 ---
 
-## MVP Scope Compliance
+## Indexes
 
-Only entities required to support the current MVP have been included.
-
-Additional modules such as Purchase Orders, Warehouses, Sales, Customers, Reports, and Analytics may be introduced in future versions without requiring significant changes to the existing database foundation.
+| Column | Type | Purpose |
+|---------|------|---------|
+| id | Primary Key | Internal relationship |
+| uuid | Unique | Public identifier |
+| email | Unique | Authentication |
 
 ---
 
-# 7. Closing
+## Constraints
 
-The Data Dictionary provides the detailed database specification required for implementing Pharmora's relational database.
+| Constraint | Description |
+|------------|-------------|
+| Primary Key | id |
+| Unique | uuid |
+| Unique | email |
+| Soft Deletes | Enabled |
 
-Together with the Database Design and Entity Relationship Diagram (ERD), this document establishes a complete database blueprint for the project.
+---
 
-The definitions contained in this document should be used as the primary reference when developing Laravel migrations, Eloquent models, database validation rules, seeders, factories, and future database enhancements.
+## Relationships
 
-Any future modifications to the database schema should be reflected in this document to maintain consistency across the project's technical documentation.
+| Relationship | Type |
+|--------------|------|
+| User → Inventory Movements | One-to-Many |
+
+A single User may perform multiple Inventory Movements throughout the lifetime of the application.
+
+---
+
+## Laravel Mapping
+
+```php
+class User extends Authenticatable
+{
+    public function inventoryMovements()
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
+}
+```
+
+---
+
+## Future Considerations
+
+The Users table has been designed to support future enhancements without requiring structural redesign.
+
+Potential future additions include:
+
+- User roles
+- Permissions
+- Profile photos
+- Two-Factor Authentication (2FA)
+- Last login tracking
+- Activity logging
+- Multi-organization support
+
+These features are intentionally excluded from the current MVP scope.
+
+---
