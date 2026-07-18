@@ -18,25 +18,31 @@ class InventoryMovementSeeder extends Seeder
         $products = Product::all();
         $user = User::firstOrFail();
 
+        $notes = [
+            'Initial stock',
+            'Supplier delivery',
+            'Restocked from supplier',
+            'Customer purchase',
+            'Prescription fulfillment',
+            'Monthly stock adjustment',
+            'Damaged product',
+            'Expired product disposal',
+            'Stock opname adjustment',
+            'Warehouse transfer',
+        ];
+
         for ($i = 1; $i <= 30; $i++) {
             InventoryMovement::create([
                 'uuid' => (string) Str::uuid(),
-
                 'product_id' => $products->random()->id,
-
                 'user_id' => $user->id,
-
                 'movement_type' => fake()->randomElement([
                     'stock_in',
                     'stock_out',
                 ]),
-
                 'quantity' => fake()->numberBetween(1, 20),
-
-                'notes' => fake()->optional()->sentence(),
-
+                'notes' => fake()->randomElement($notes),
                 'reference_number' => sprintf('MOV-%06d', $i),
-
                 'created_at' => fake()->dateTimeBetween('-30 days', 'now'),
             ]);
         }
