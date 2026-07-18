@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\Supplier;
+use Carbon\CarbonPeriod;
 
 class DashboardService
 {
@@ -50,27 +51,36 @@ class DashboardService
     }
 
     /**
-     * Get inventory analytics for dashboard chart.
+     * Get inventory analytics for the last six months.
      */
     private function getInventoryAnalytics(): array
     {
+        $startDate = now()->subMonths(5)->startOfMonth();
+        $endDate = now()->endOfMonth();
+
         $movements = InventoryMovement::query()
             ->select([
                 'movement_type',
                 'quantity',
                 'created_at',
             ])
-            ->where('created_at', '>=', now()->subMonths(6))
-            ->orderBy('created_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
-            ->groupBy(fn ($movement) => $movement->created_at->format('M'));
+            ->groupBy(fn ($movement) => $movement->created_at->format('Y-m'));
 
         $labels = [];
         $stockIn = [];
         $stockOut = [];
 
-        foreach ($movements as $month => $records) {
-            $labels[] = $month;
+        $period = CarbonPeriod::create($startDate, '1 month', $endDate);
+
+        foreach ($period as $date) {
+            $monthKey = $date->format('Y-m');
+            $monthLabel = $date->format('M');
+
+            $records = $movements->get($monthKey, collect());
+
+            $labels[] = $monthLabel;
 
             $stockIn[] = $records
                 ->where('movement_type', 'stock_in')
