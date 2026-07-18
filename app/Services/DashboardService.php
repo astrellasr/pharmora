@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Models\InventoryMovement;
+use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
@@ -16,7 +18,7 @@ class DashboardService
         return array_merge(
             $this->getStatistics(),
             [
-                'inventoryAnalytics' => [],
+                'inventoryAnalytics' => $this->getInventoryAnalytics(),
                 'lowStockProducts'   => [],
                 'recentActivities'   => [],
                 'topCategories'      => [],
