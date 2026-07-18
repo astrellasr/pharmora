@@ -2,25 +2,49 @@
 
 namespace App\Services;
 
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Supplier;
+
 class DashboardService
 {
+    /**
+     * Get all dashboard data.
+     */
     public function getDashboardData(): array
     {
+        return array_merge(
+            $this->getStatistics(),
+            [
+                'inventoryAnalytics' => [],
+                'lowStockProducts'   => [],
+                'recentActivities'   => [],
+                'topCategories'      => [],
+            ]
+        );
+    }
+
+    /**
+     * Get dashboard statistics.
+     */
+    private function getStatistics(): array
+    {
         return [
-            'totalProducts'   => 0,
-            'totalCategories' => 0,
-            'totalSuppliers'  => 0,
-            'totalInventory'  => 0,
-            'lowStockCount'   => 0,
-            'outOfStockCount' => 0,
+            'totalProducts' => Product::query()->count(),
 
-            'inventoryAnalytics' => [],
+            'totalCategories' => Category::query()->count(),
 
-            'lowStockProducts' => [],
+            'totalSuppliers' => Supplier::query()->count(),
 
-            'recentActivities' => [],
+            'totalInventory' => Product::query()->sum('current_stock'),
 
-            'topCategories' => [],
+            'lowStockCount' => Product::query()
+                ->whereColumn('current_stock', '<=', 'minimum_stock')
+                ->count(),
+
+            'outOfStockCount' => Product::query()
+                ->where('current_stock', 0)
+                ->count(),
         ];
     }
 }
