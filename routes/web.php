@@ -21,9 +21,17 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    use App\Http\Controllers\DashboardController;
+
+// ...
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/dashboard', DashboardController::class)
+        ->name('dashboard');
+
+    // Route lainnya...
+});
 
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
