@@ -3,10 +3,9 @@
 namespace App\Services;
 
 use App\Models\Category;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\Supplier;
-use App\Models\InventoryMovement;
-use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
@@ -47,6 +46,45 @@ class DashboardService
             'outOfStockCount' => Product::query()
                 ->where('current_stock', 0)
                 ->count(),
+        ];
+    }
+
+    /**
+     * Get inventory analytics for dashboard chart.
+     */
+    private function getInventoryAnalytics(): array
+    {
+        $movements = InventoryMovement::query()
+            ->select([
+                'movement_type',
+                'quantity',
+                'created_at',
+            ])
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy(fn ($movement) => $movement->created_at->format('M'));
+
+        $labels = [];
+        $stockIn = [];
+        $stockOut = [];
+
+        foreach ($movements as $month => $records) {
+            $labels[] = $month;
+
+            $stockIn[] = $records
+                ->where('movement_type', 'stock_in')
+                ->sum('quantity');
+
+            $stockOut[] = $records
+                ->where('movement_type', 'stock_out')
+                ->sum('quantity');
+        }
+
+        return [
+            'labels' => $labels,
+            'stockIn' => $stockIn,
+            'stockOut' => $stockOut,
         ];
     }
 }
