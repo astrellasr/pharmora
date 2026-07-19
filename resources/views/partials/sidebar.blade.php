@@ -3,8 +3,8 @@
     <div class="flex h-full flex-col">
 
         {{-- Logo --}}
-        <div class="px-6 py-6">
-            <h1 class="text-xl font-bold">
+        <div class="px-6 py-8">
+            <h1 class="text-2xl font-bold text-emerald-600">
                 Pharmora
             </h1>
         </div>
@@ -14,31 +14,36 @@
             <ul class="space-y-2">
 
                 <li>
-                    <a href="#">
+                    <a href="{{ route('dashboard') }}"
+                        class="flex items-center rounded-xl px-4 py-3 text-sm font-medium">
                         Dashboard
                     </a>
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a href="#"
+                        class="flex items-center rounded-xl px-4 py-3 text-sm font-medium">
                         Products
                     </a>
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a href="#"
+                        class="flex items-center rounded-xl px-4 py-3 text-sm font-medium">
                         Categories
                     </a>
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a href="#"
+                        class="flex items-center rounded-xl px-4 py-3 text-sm font-medium">
                         Suppliers
                     </a>
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a href="#"
+                        class="flex items-center rounded-xl px-4 py-3 text-sm font-medium">
                         Inventory
                     </a>
                 </li>
@@ -52,13 +57,15 @@
             <ul class="space-y-2">
 
                 <li>
-                    <a href="#">
+                    <a href="#"
+                        class="flex items-center rounded-xl px-4 py-3 text-sm font-medium">
                         Profile
                     </a>
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a href="#"
+                        class="flex items-center rounded-xl px-4 py-3 text-sm font-medium">
                         Settings
                     </a>
                 </li>
