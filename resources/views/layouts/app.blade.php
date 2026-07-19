@@ -16,7 +16,15 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+            @include('partials.sidebar')
+
+<div class="min-h-screen">
+    @include('partials.navbar')
+
+    <main>
+        {{ $slot }}
+    </main>
+</div>
 
             <!-- Page Heading -->
             @isset($header)
